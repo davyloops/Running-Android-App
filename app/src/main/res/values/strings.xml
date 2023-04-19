@@ -2,7 +2,6 @@
     <string name="app_name">Record Keeper</string>
     <string name="running">Running</string>
     <string name="cycling">Cycling</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="five_km_heading">5km</string>
     <string name="ten_km_heading">10km</string>
@@ -17,4 +16,7 @@
     <string name="date_field_hint">Date</string>
     <string name="save_button_text">Save</string>
     <string name="clear_record_button_text">Clear Record</string>
+    <string name="bottom_nav_records">Records</string>
+    <string name="bottom_nav_track">Track</string>
+    <string name="google_maps_api_key">AIzaSyDyT0Zgic5C956S3A80n9Xojw4TDsBgV6o</string>
 </resources>

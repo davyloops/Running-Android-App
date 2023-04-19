@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/nav_running"
-        android:title="@string/running"
+    <item android:id="@+id/nav_records"
+        android:title="@string/bottom_nav_records"
         android:icon="@drawable/ic_running_24"/>
 
-    <item android:id="@+id/nav_cycling"
-        android:title="@string/cycling"
-        android:icon="@drawable/ic_cycling_24"/>
+<!--    <item android:id="@+id/nav_cycling"-->
+<!--        android:title="@string/cycling"-->
+<!--        android:icon="@drawable/ic_cycling_24"/>-->
 
+    <item android:id="@+id/nav_track"
+        android:title="@string/bottom_nav_track"
+        android:icon="@drawable/ic_map_24"/>
 </menu>

@@ -10,6 +10,8 @@ import com.example.recordkeeper.databinding.ActivityMainBinding
 import com.example.recordkeeper.running.RunningFragment
 import com.google.android.material.navigation.NavigationBarView.OnItemSelectedListener
 import com.example.recordkeeper.cycling.CyclingFragment
+import com.example.recordkeeper.track.MapsFragment
+import com.example.recordkeeper.track.TrackFragment
 
 class MainActivity : AppCompatActivity(), OnItemSelectedListener {
 
@@ -30,45 +32,46 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.reset_cycling -> {
-                Toast.makeText(this, "Cycling records have been reset.", Toast.LENGTH_LONG).show()
-                return true
-            }
-            R.id.reset_running -> {
-                Toast.makeText(this, "Running records have been reset.", Toast.LENGTH_LONG).show()
-                return true
-            }
-            R.id.reset_all_records -> {
-                Toast.makeText(this, "All records have been reset.", Toast.LENGTH_LONG).show()
-                return true
-            }
-            else -> {
-                return super.onOptionsItemSelected(item)
-            }
-        }
+//        when (item.itemId) {
+//            R.id.reset_cycling -> {
+//                Toast.makeText(this, "Cycling records have been reset.", Toast.LENGTH_LONG).show()
+//                return true
+//            }
+//            R.id.reset_running -> {
+//                Toast.makeText(this, "Running records have been reset.", Toast.LENGTH_LONG).show()
+//                return true
+//            }
+//            R.id.reset_all_records -> {
+//                Toast.makeText(this, "All records have been reset.", Toast.LENGTH_LONG).show()
+//                return true
+//            }
+//            else -> {
+//                return super.onOptionsItemSelected(item)
+//            }
+//        }
+        return true
     }
 
-    private fun onRunningClicked() {
+    private fun onRecordsClicked() {
         supportFragmentManager.commit {
             replace(R.id.frame_content, RunningFragment())
         }
     }
 
-    private fun onCyclingClicked() {
+    private fun onTrackClicked() {
         supportFragmentManager.commit {
-            replace(R.id.frame_content, CyclingFragment())
+            replace(R.id.frame_content, MapsFragment())
         }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_cycling -> {
-                onCyclingClicked()
+            R.id.nav_track -> {
+                onTrackClicked()
                 return true
             }
-            R.id.nav_running -> {
-                onRunningClicked()
+            R.id.nav_records -> {
+                onRecordsClicked()
                 return true
             }
             else -> return false
