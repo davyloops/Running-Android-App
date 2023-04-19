@@ -19,4 +19,5 @@
     <string name="bottom_nav_records">Records</string>
     <string name="bottom_nav_track">Track</string>
     <string name="google_maps_api_key">AIzaSyDyT0Zgic5C956S3A80n9Xojw4TDsBgV6o</string>
+    <string name="track_start_button_text">Start</string>
 </resources>

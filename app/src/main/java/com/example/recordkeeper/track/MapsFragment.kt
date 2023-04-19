@@ -1,9 +1,13 @@
 package com.example.recordkeeper.track
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Looper
+import android.provider.SettingsSlicesContract.KEY_LOCATION
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,14 +16,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.recordkeeper.R
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.example.recordkeeper.databinding.FragmentMapsBinding
+import com.example.recordkeeper.databinding.FragmentRunningBinding
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.Task
 
 
 var locationPermissionGranted = false
@@ -28,10 +36,15 @@ private var lastKnownLocation: Location? = null
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
 
+    private lateinit var binding: FragmentMapsBinding
     private var googleMap: GoogleMap? = null
     private var cameraPosition: CameraPosition? = null
     private val defaultLocation = LatLng(29.6516, -82.3248)
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationSettingsRequest: LocationSettingsRequest
+    private lateinit var locationCallback: LocationCallback
+
 
 //    private val callback = OnMapReadyCallback { googleMap ->
 //        /**
@@ -52,21 +65,80 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_maps, container, false)
+    ): View {
+//        return inflater.inflate(R.layout.fragment_maps, container, false)
+        binding = FragmentMapsBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        binding.buttonStartPause.setOnClickListener { onClickStartPauseButton() }
+
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
+        locationRequest = LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult) {
+                for (location in p0.locations){
+                    if (location != null) {
+                        googleMap?.addMarker(MarkerOptions().position(LatLng(location.latitude, location.longitude)).title("Current Location"))
+                    }
+                    updateLocationUI()
+                }
+            }
+        }
+
+
+
+
 //        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
 //        mapFragment?.getMapAsync(callback)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment?.getMapAsync(this)
-        if (savedInstanceState != null) {
-            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
-            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION)
+            val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+            mapFragment?.getMapAsync(this)
+            if (savedInstanceState != null) {
+                lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
+                cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION)
+            }
         }
+
+    private fun onClickStartPauseButton() {
+        if (binding.buttonStartPause.text.toString() == "Start") {
+            startLocationUpdates()
+            binding.buttonStartPause.text = "Pause"
+            return
+        }
+
+        binding.buttonStartPause.text = "Start"
+        stopLocationUpdates()
+    }
+
+    private fun stopLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+    }
+
+    private fun startLocationUpdates() {
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+            return
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -86,30 +158,38 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     private fun getLocationPermission() {
         /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(requireContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+     * Request location permission, so that we can get the location of the
+     * device. The result of the permission request is handled by a callback,
+     * onRequestPermissionsResult.
+     */
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             locationPermissionGranted = true
         } else {
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(
+                requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         locationPermissionGranted = false
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
 
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
                     locationPermissionGranted = true
                 }
             }
@@ -141,9 +221,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private fun getDeviceLocation() {
         /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
+     * Get the best and most recent location of the device, which may be null in rare
+     * cases when a location is not available.
+     */
         try {
             if (locationPermissionGranted) {
                 val locationResult = fusedLocationProviderClient.lastLocation
@@ -155,15 +235,30 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                         if (lastKnownLocation != null) {
                             Log.d("location", "${lastKnownLocation!!.latitude}")
                             Log.d("location", "${lastKnownLocation!!.longitude}")
-                            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                LatLng(lastKnownLocation!!.latitude,
-                                    lastKnownLocation!!.longitude), DEFAULT_ZOOM.toFloat()))
+                            googleMap?.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    LatLng(
+                                        lastKnownLocation!!.latitude,
+                                        lastKnownLocation!!.longitude
+                                    ), DEFAULT_ZOOM.toFloat()
+                                )
+                            )
+                            googleMap?.addMarker(
+                                MarkerOptions().position(
+                                    LatLng(
+                                        lastKnownLocation!!.latitude,
+                                        lastKnownLocation!!.longitude
+                                    )
+                                ).title("Current Location")
+                            )
                         }
                     } else {
                         Log.d(TAG, "Current location is null. Using defaults.")
                         Log.e(TAG, "Exception: %s", task.exception)
-                        googleMap?.moveCamera(CameraUpdateFactory
-                            .newLatLngZoom(defaultLocation, DEFAULT_ZOOM.toFloat()))
+                        googleMap?.moveCamera(
+                            CameraUpdateFactory
+                                .newLatLngZoom(defaultLocation, DEFAULT_ZOOM.toFloat())
+                        )
                         googleMap?.uiSettings?.isMyLocationButtonEnabled = false
                     }
                 }
@@ -177,6 +272,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         private val TAG = MapsFragment::class.java.simpleName
         private const val DEFAULT_ZOOM = 15
         private const val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+        private const val REQUEST_CHECK_SETTINGS = 61124
 
         // Keys for storing activity state.
         // [START maps_current_place_state_keys]
