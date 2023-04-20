@@ -52,9 +52,9 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
         return true
     }
 
-    private fun onRecordsClicked() {
+    private fun onRunningLogClicked() {
         supportFragmentManager.commit {
-            replace(R.id.frame_content, RunningFragment())
+            replace(R.id.frame_content, RunningLogFragment())
         }
     }
 
@@ -70,8 +70,8 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
                 onTrackClicked()
                 return true
             }
-            R.id.nav_records -> {
-                onRecordsClicked()
+            R.id.nav_running_log -> {
+                onRunningLogClicked()
                 return true
             }
             else -> return false

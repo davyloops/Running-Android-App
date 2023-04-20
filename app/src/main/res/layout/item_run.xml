@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_view_run"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:textSize="16sp"
+                android:id="@+id/text_view_run_item_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="November 21 2023"
+                android:padding="12dp" />
+
+            <TextView
+                android:id="@+id/text_view_run_item_distance"
+                android:layout_width="wrap_content"
+                android:textSize="24sp"
+                tools:text="22 km"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_run_item_date"
+                app:layout_constraintStart_toStartOf="@+id/text_view_run_item_date"
+                app:layout_constraintEnd_toEndOf="@+id/text_view_run_item_date"
+                android:paddingBottom="8dp"
+                android:layout_height="wrap_content"/>
+
+
+            <TextView
+                android:id="@+id/text_view_run_item_time"
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Time: 60 min"/>
+
+            <TextView
+                android:textSize="16sp"
+                android:padding="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_view_run_item_time"
+                tools:text="Average Speed: 60 min"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
