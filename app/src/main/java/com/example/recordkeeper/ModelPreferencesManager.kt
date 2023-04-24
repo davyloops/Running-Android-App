@@ -14,7 +14,7 @@ object ModelPreferencesManager {
     lateinit var preferences: SharedPreferences
 
     //Name of Shared Preference file
-    private const val PREFERENCES_FILE_NAME = "PREFERENCES_FILE_NAME"
+    private const val PREFERENCES_FILE_NAME = "log"
 
     /**
      * Call this first before retrieving or saving object.
@@ -37,6 +37,10 @@ object ModelPreferencesManager {
         val jsonString = GsonBuilder().create().toJson(`object`)
         //Save that String in SharedPreferences
         preferences.edit().putString(key, jsonString).apply()
+    }
+
+    fun remove(key: String) {
+        preferences.edit().remove(key).apply()
     }
 
     /**

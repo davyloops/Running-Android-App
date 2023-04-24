@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.Display.Mode
+import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class RunningLogFragment : Fragment() {
+class RunningLogFragment : Fragment(), RecyclerViewInterface {
 
     private lateinit var binding: FragmentRunningLogBinding
     private var selectedDate: String = getCurrentDate()
@@ -40,9 +41,7 @@ class RunningLogFragment : Fragment() {
 
         binding.calendarView.setOnDateChangeListener { calendarView, year, month, dayOfMonth ->
             selectedDate = "$year-${month + 1}-$dayOfMonth"
-            val newRuns = getRuns()
-            setRuns(newRuns)
-            displayRuns()
+            refreshRecyclerView()
         }
 
         val time = Calendar.getInstance().time
@@ -51,10 +50,20 @@ class RunningLogFragment : Fragment() {
 
         list = binding.recyclerView
 
-        if (runs != null) {
-            adapter = RunAdapter(runs!!)
-            list.adapter = adapter
-        }
+        adapter = RunAdapter(runs!!, this)
+        list.adapter = adapter
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        refreshRecyclerView()
+    }
+
+    private fun refreshRecyclerView() {
+        val newRuns = getRuns()
+        setRuns(newRuns)
+        displayRuns()
     }
 
     fun getSelectedDate(): String {
@@ -71,7 +80,7 @@ class RunningLogFragment : Fragment() {
         if (ModelPreferencesManager.contains(selectedDate)) {
             return ModelPreferencesManager.get<Runs>(selectedDate)
         }
-        return null
+        return Runs(mutableListOf())
     }
 
     private fun setRuns(newRuns: Runs?) {
@@ -93,5 +102,13 @@ class RunningLogFragment : Fragment() {
             list.isVisible = true
             adapter.notifyDataSetChanged()
         }
+    }
+
+    override fun onItemClick(position: Int) {
+        val intent = Intent(activity, EditRecordActivity::class.java)
+        intent.putExtra("Date", selectedDate)
+        intent.putExtra("Id", runs?.get(position)?.id)
+        intent.putExtra("Is Editing Run", true)
+        startActivity(intent)
     }
 }
