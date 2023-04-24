@@ -1,5 +1,8 @@
 package com.example.recordkeeper
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -10,6 +13,7 @@ import com.example.recordkeeper.databinding.ActivityMainBinding
 import com.example.recordkeeper.running.RunningFragment
 import com.google.android.material.navigation.NavigationBarView.OnItemSelectedListener
 import com.example.recordkeeper.cycling.CyclingFragment
+import com.example.recordkeeper.editrecord.EditRecordActivity
 import com.example.recordkeeper.track.MapsFragment
 import com.example.recordkeeper.track.TrackFragment
 
@@ -17,8 +21,16 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
 
     private lateinit var binding: ActivityMainBinding
 
+    private val logPreferences: SharedPreferences by lazy {
+        getSharedPreferences("log", Context.MODE_PRIVATE)
+    }
+
+    private lateinit var menu: Menu
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ModelPreferencesManager.with(application)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -28,27 +40,31 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
+        if (menu != null) {
+            this.menu = menu
+        }
+        showMenuToolbar(false)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when (item.itemId) {
-//            R.id.reset_cycling -> {
-//                Toast.makeText(this, "Cycling records have been reset.", Toast.LENGTH_LONG).show()
-//                return true
-//            }
-//            R.id.reset_running -> {
-//                Toast.makeText(this, "Running records have been reset.", Toast.LENGTH_LONG).show()
-//                return true
-//            }
-//            R.id.reset_all_records -> {
-//                Toast.makeText(this, "All records have been reset.", Toast.LENGTH_LONG).show()
-//                return true
-//            }
-//            else -> {
-//                return super.onOptionsItemSelected(item)
-//            }
-//        }
+        when (item.itemId) {
+            R.id.reset_running -> {
+                Toast.makeText(this, "Running records have been reset.", Toast.LENGTH_LONG).show()
+            }
+            R.id.add_run -> {
+                val runningLogFrag = supportFragmentManager.fragments[0] as RunningLogFragment
+                val selectedDate = runningLogFrag.getSelectedDate()
+
+                val intent = Intent(applicationContext, EditRecordActivity::class.java)
+                intent.putExtra("Date", selectedDate)
+                intent.putExtra("Is Editing Run", false)
+                startActivity(intent)
+            }
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
+        }
         return true
     }
 
@@ -56,12 +72,14 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
         supportFragmentManager.commit {
             replace(R.id.frame_content, RunningLogFragment())
         }
+        showMenuToolbar(true)
     }
 
     private fun onTrackClicked() {
         supportFragmentManager.commit {
             replace(R.id.frame_content, MapsFragment())
         }
+        showMenuToolbar(false)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -75,6 +93,17 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
                 return true
             }
             else -> return false
+        }
+    }
+
+    private fun showMenuToolbar(shouldShow: Boolean) {
+        if (shouldShow) {
+            menu.findItem(R.id.reset_running).isVisible = true
+            menu.findItem(R.id.add_run).isVisible = true
+        }
+        else {
+            menu.findItem(R.id.reset_running).isVisible = false
+            menu.findItem(R.id.add_run).isVisible = false
         }
     }
 }

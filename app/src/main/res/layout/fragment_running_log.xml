@@ -6,12 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".RunningLogFragment">
 
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <CalendarView
+            android:id="@+id/calendar_view"
             android:paddingTop="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

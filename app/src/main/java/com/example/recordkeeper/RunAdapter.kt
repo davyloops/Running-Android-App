@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class RunAdapter(private val runs: Array<Run>): RecyclerView.Adapter<RunAdapter.RunViewHolder>() {
+class RunAdapter(private val runs: Runs): RecyclerView.Adapter<RunAdapter.RunViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RunAdapter.RunViewHolder {
         val context = parent.context
@@ -31,13 +31,9 @@ class RunAdapter(private val runs: Array<Run>): RecyclerView.Adapter<RunAdapter.
 
         fun bind(run: Run) {
             dateTextView.text = run.date
-            distanceTextView.text = run.distance
+            distanceTextView.text = run.distance.toString()
             timeTextView.text = run.time.toString()
             averageSpeedTextView.text = run.averageSpeed.toString()
         }
-    }
-
-    fun bind(run: Run) {
-
     }
 }

@@ -8,31 +8,47 @@
     tools:context=".running.EditRunningRecordActivity">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_input_record"
+        android:id="@+id/text_input_distance"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/record_field_hint"
+        android:hint="@string/text_input_distance"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_text_record"
+            android:id="@+id/edit_text_distance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="24:15" />
+            tools:text="100" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/text_input_date"
+        android:id="@+id/text_input_time"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:hint="Time (hh:mm:ss)"
+        app:layout_constraintTop_toBottomOf="@id/text_input_distance">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="5th January 2023" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_average_speed"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:hint="@string/date_field_hint"
-        app:layout_constraintTop_toBottomOf="@id/text_input_record">
+        app:layout_constraintTop_toBottomOf="@id/text_input_time">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_text_date"
+            android:id="@+id/edit_text_average_speed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="5th January 2023" />
@@ -44,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:text="@string/save_button_text"
-        app:layout_constraintTop_toBottomOf="@id/text_input_date" />
+        app:layout_constraintTop_toBottomOf="@id/text_input_average_speed" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_delete"

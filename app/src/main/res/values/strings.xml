@@ -22,4 +22,7 @@
     <string name="track_start_button_text">Start</string>
     <string name="button_end_run">End Run</string>
     <string name="bottom_nav_running_log">Log</string>
+    <string name="reset_running_log">Reset Running Log</string>
+    <string name="text_input_distance">Distance</string>
+    <string name="toolbar_add_run">Add Run</string>
 </resources>

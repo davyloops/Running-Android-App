@@ -5,15 +5,20 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.content.edit
+import com.example.recordkeeper.MainActivity
+import com.example.recordkeeper.ModelPreferencesManager
+import com.example.recordkeeper.Run
+import com.example.recordkeeper.Runs
 import com.example.recordkeeper.databinding.ActivityEditRecordBinding
 
 class EditRecordActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditRecordBinding
     private val runningPreferences: SharedPreferences by lazy {
-        getSharedPreferences("records", Context.MODE_PRIVATE)
+        getSharedPreferences("log", Context.MODE_PRIVATE)
     }
-    private val category: String? by lazy { intent.getStringExtra("Category") }
+    private val date: String? by lazy { intent.getStringExtra("Date") }
+    private val isEditingRun: Boolean? by lazy { intent.getBooleanExtra("Is Editing Run", false) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,11 +29,11 @@ class EditRecordActivity : AppCompatActivity() {
     }
 
     private fun setupUi() {
-        title = "$category Record"
+        title = "$date Run"
 
-        displayRecord(category)
+        displayRecord(date)
         binding.buttonSave.setOnClickListener {
-            saveRecord(category)
+            saveRecord()
             finish()
         }
 
@@ -40,25 +45,47 @@ class EditRecordActivity : AppCompatActivity() {
 
     private fun clearRecord() {
         runningPreferences.edit {
-            remove("$category record")
-            remove("$category date")
+            remove("$date record")
+            remove("$date date")
         }
     }
 
     private fun displayRecord(category: String?) {
-        binding.editTextRecord.setText(runningPreferences.getString("$category record", null))
-        binding.editTextDate.setText(runningPreferences.getString("$category date", null))
+        binding.editTextDistance.setText(runningPreferences.getString("$date record", null))
+        binding.editTextTime.setText(runningPreferences.getString("$date date", null))
     }
 
-    private fun saveRecord(category: String?) {
-        val record = binding.editTextRecord.text.toString()
-        val date = binding.editTextDate.text.toString()
+    private fun saveRecord() {
 
-        val runningPreferences = getSharedPreferences("records", Context.MODE_PRIVATE)
+        createRuns()
+        val recordName = nameRecord()
+        val runs = getRuns()
 
-        runningPreferences.edit {
-            putString("$category record", record)
-            putString("$category date", date)
+
+        val distance = binding.editTextDistance.text.toString().toFloat()
+        val time = binding.editTextTime.text.toString().toInt()
+
+        val run = Run(recordName, "$date", distance, time)
+        runs?.add(run)
+
+        ModelPreferencesManager.put(runs, "$date")
+    }
+
+    private fun createRuns() {
+        if (!ModelPreferencesManager.contains("$date")) {
+            ModelPreferencesManager.put(Runs(mutableListOf()), "$date")
         }
+    }
+
+    private fun getRuns(): Runs? {
+        if (ModelPreferencesManager.contains("$date")) {
+            return ModelPreferencesManager.get<Runs>("$date")
+        }
+        return null
+    }
+
+    private fun nameRecord(): String {
+        val runs = getRuns()
+        return "$date-${runs?.size}"
     }
 }
