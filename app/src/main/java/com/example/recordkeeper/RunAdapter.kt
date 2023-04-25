@@ -23,8 +23,7 @@ class RunAdapter(private val runs: Runs, private val recyclerViewInterface: Recy
         return runs.size
     }
 
-    inner class RunViewHolder(itemView: View, val recyclerViewInterface: RecyclerViewInterface): RecyclerView.ViewHolder(itemView) {
-        val dateTextView = itemView.findViewById<TextView>(R.id.text_view_run_item_date)
+    inner class RunViewHolder(itemView: View, private val recyclerViewInterface: RecyclerViewInterface): RecyclerView.ViewHolder(itemView) {
         val distanceTextView = itemView.findViewById<TextView>(R.id.text_view_run_item_distance)
         val timeTextView = itemView.findViewById<TextView>(R.id.text_view_run_item_time)
         val averageSpeedTextView = itemView.findViewById<TextView>(R.id.text_view_run_item_average_speed)
@@ -38,11 +37,8 @@ class RunAdapter(private val runs: Runs, private val recyclerViewInterface: Recy
                 if (position != RecyclerView.NO_POSITION) {
                     recyclerViewInterface.onItemClick(position)
                 }
-
-
             }
 
-            dateTextView.text = run.date
             distanceTextView.text = run.distance.toString()
             timeTextView.text = run.time.toString()
             averageSpeedTextView.text = run.averageSpeed.toString()

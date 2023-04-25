@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.example.recordkeeper.ModelPreferencesManager
 import com.example.recordkeeper.Run
 import com.example.recordkeeper.Runs
@@ -16,8 +17,9 @@ class EditRecordActivity : AppCompatActivity() {
         getSharedPreferences("log", Context.MODE_PRIVATE)
     }
     private val date: String? by lazy { intent.getStringExtra("Date") }
-    private val isEditingRun: Boolean? by lazy { intent.getBooleanExtra("Is Editing Run", false) }
     private val ID: String? by lazy { intent.getStringExtra("Id") }
+    private val intentDistance by lazy {intent.getStringExtra("Distance")}
+    private val intentTime by lazy {intent.getStringExtra("Time")}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +42,7 @@ class EditRecordActivity : AppCompatActivity() {
             finish()
         }
 
-        if (ID != null) displayRecord()
+        displayRecord()
     }
 
     private fun clearRecord() {
@@ -52,11 +54,16 @@ class EditRecordActivity : AppCompatActivity() {
     }
 
     private fun displayRecord() {
-        val run = getRun()
+        if (ID != null) {
+            val run = getRun()
 
-        binding.editTextDistance.setText(run?.distance.toString(), null)
-        binding.editTextTime.setText(run?.time.toString(), null)
+            binding.editTextDistance.setText(run?.distance.toString(), null)
+            binding.editTextTime.setText(run?.time.toString(), null)
+            return
+        }
 
+        if (intentDistance != null) binding.editTextDistance.setText(intentDistance, null)
+        if (intentTime != null) binding.editTextTime.setText(intentTime, null)
     }
 
     private fun saveRecord() {

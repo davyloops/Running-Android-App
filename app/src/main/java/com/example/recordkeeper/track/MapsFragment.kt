@@ -2,23 +2,31 @@ package com.example.recordkeeper.track
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.SettingsSlicesContract.KEY_LOCATION
+import android.text.TextUtils.replace
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.transition.Visibility
 import com.example.recordkeeper.R
+import com.example.recordkeeper.RunningLogFragment
 import com.example.recordkeeper.databinding.FragmentMapsBinding
+import com.example.recordkeeper.editrecord.EditRecordActivity
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -26,6 +34,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import kotlinx.coroutines.NonDisposableHandle.parent
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MapsFragment : Fragment(), OnMapReadyCallback {
@@ -47,6 +57,9 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var isFirstLocationResult = true
     var locationPermissionGranted = false
 
+    private var chronometerPauseOffset: Long = 0
+    private lateinit var alertDialogBuilder: AlertDialog.Builder
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,7 +72,11 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        activity?.title = "Run"
+
+        alertDialogBuilder = AlertDialog.Builder(requireActivity())
         binding.buttonStartPause.setOnClickListener { onClickStartPauseButton() }
+        binding.buttonEndRun.setOnClickListener { onClickEndRunButton() }
         polylineOptions = PolylineOptions().apply {
             color(Color.BLUE)
             jointType(JointType.ROUND)
@@ -89,6 +106,7 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
                     googleMap?.addPolyline(polylineOptions)
                     binding.textViewDistance.text = distance.toString()
                     updateLocationUI()
+                    updateBarUI()
                 }
             }
         }
@@ -99,6 +117,14 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION)
             cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION)
         }
+    }
+
+    private fun updateBarUI() {
+        binding.textViewBarDistance.text = distance.toString()
+        val timeElapsed = SystemClock.elapsedRealtime() - binding.chronometer.base
+        Log.d("log", timeElapsed.toString())
+        val averageSpeed = distance / timeElapsed
+        binding.textViewBarAverageSpeed.text = averageSpeed.toString()
     }
 
     private fun distanceInMeters(currentLocationLat: Double, currentLocationLong: Double): Float {
@@ -115,11 +141,40 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             startLocationUpdates()
             binding.buttonStartPause.text = "Pause"
             binding.buttonEndRun.visibility = View.VISIBLE
+            binding.chronometer.base = SystemClock.elapsedRealtime() - chronometerPauseOffset
+            binding.chronometer.start()
             return
         }
 
         binding.buttonStartPause.text = "Start"
+        binding.chronometer.stop()
+        chronometerPauseOffset = SystemClock.elapsedRealtime() - binding.chronometer.base
         stopLocationUpdates()
+    }
+
+    private fun onClickEndRunButton() {
+        alertDialogBuilder.setTitle("End Run?")
+            .setMessage("Do you want to end this run?")
+            .setCancelable(true)
+            .setPositiveButton("Yes") { dialogInterface, i ->
+                binding.chronometer.base = SystemClock.elapsedRealtime()
+                chronometerPauseOffset = 0
+                distance = 0.0
+                binding.textViewBarAverageSpeed.text = "0 mph"
+
+
+                val intent = Intent(activity, EditRecordActivity::class.java)
+                intent.putExtra("Date", getCurrentDate())
+                intent.putExtra("Distance", distance.toString())
+                Log.d("distance", distance.toString())
+                intent.putExtra("Time", (SystemClock.elapsedRealtime() - binding.chronometer.base).toString())
+                Log.d("time", (SystemClock.elapsedRealtime() - binding.chronometer.base).toString())
+                startActivity(intent)
+            }
+            .setNegativeButton("No", DialogInterface.OnClickListener { dialogInterface, i ->
+
+            })
+            .show()
     }
 
     private fun stopLocationUpdates() {
@@ -255,6 +310,12 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
         }
+    }
+
+    private fun getCurrentDate(): String {
+        val time = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyy-M-d")
+        return formatter.format(time)
     }
 
     companion object {

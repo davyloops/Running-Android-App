@@ -39,6 +39,8 @@ class RunningLogFragment : Fragment(), RecyclerViewInterface {
     override fun onStart() {
         super.onStart()
 
+        activity?.title = "Running Log"
+
         binding.calendarView.setOnDateChangeListener { calendarView, year, month, dayOfMonth ->
             selectedDate = "$year-${month + 1}-$dayOfMonth"
             refreshRecyclerView()

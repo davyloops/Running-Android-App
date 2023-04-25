@@ -20,11 +20,6 @@ import com.example.recordkeeper.track.TrackFragment
 class MainActivity : AppCompatActivity(), OnItemSelectedListener {
 
     private lateinit var binding: ActivityMainBinding
-
-    private val logPreferences: SharedPreferences by lazy {
-        getSharedPreferences("log", Context.MODE_PRIVATE)
-    }
-
     private lateinit var menu: Menu
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,12 +48,11 @@ class MainActivity : AppCompatActivity(), OnItemSelectedListener {
                 Toast.makeText(this, "Running records have been reset.", Toast.LENGTH_LONG).show()
             }
             R.id.add_run -> {
-                val runningLogFrag = supportFragmentManager.fragments[0] as RunningLogFragment
+                val runningLogFrag = supportFragmentManager.fragments[1] as RunningLogFragment
                 val selectedDate = runningLogFrag.getSelectedDate()
 
                 val intent = Intent(applicationContext, EditRecordActivity::class.java)
                 intent.putExtra("Date", selectedDate)
-                intent.putExtra("Is Editing Run", false)
                 startActivity(intent)
             }
             else -> {
